@@ -1,5 +1,5 @@
 plugins {
-    id 'io.github.arc-blroth.cargo-wrapper' version '1.0.0'
+    id( "io.github.arc-blroth.cargo-wrapper").version( "1.2.0")
 }
 
 cargo {
@@ -12,5 +12,5 @@ cargo {
     // This code assumes that the library will not be
     // cross-compiled, and that the default toolchain
     // according to rustup compiles for the host target.
-    outputs = ['': System.mapLibraryName('wrapper_example')]
+    outputs = mapOf("" to "wrapper_example")
 }
