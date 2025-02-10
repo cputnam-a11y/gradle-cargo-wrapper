@@ -17,6 +17,7 @@ package ai.arcblroth.cargo;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.OutputFiles;
 import org.gradle.api.tasks.TaskAction;
@@ -32,6 +33,11 @@ import java.util.stream.Collectors;
  * The main Cargo wrapper task.
  */
 public class CargoTask extends DefaultTask {
+    /**
+     * Constructs a new Cargo task.
+     */
+    public CargoTask() {
+    }
 
     private String cargoCommand;
     private List<String> args;
@@ -64,12 +70,16 @@ public class CargoTask extends DefaultTask {
         if (config.cargoCommand != null && config.cargoCommand.isEmpty()) {
             throw new GradleException("Cargo command cannot be empty");
         }
-        this.cargoCommand = config.cargoCommand == null ? "cargo" : config.cargoCommand;
+        this.cargoCommand = config.cargoCommand == null
+                            ? "cargo"
+                            : config.cargoCommand;
 
         this.args = new ArrayList<>();
         if (config.toolchain != null) {
             // Remove a preceding `+`, if present.
-            String toolchain = config.toolchain.startsWith("+") ? config.toolchain.substring(1) : config.toolchain;
+            String toolchain = config.toolchain.startsWith("+")
+                               ? config.toolchain.substring(1)
+                               : config.toolchain;
             if (toolchain.isEmpty()) {
                 throw new GradleException("Toolchain cannot be empty");
             }
@@ -83,13 +93,17 @@ public class CargoTask extends DefaultTask {
 
         this.environment = new ConcurrentHashMap<>(config.environment);
 
-        this.workingDir = config.crate != null ? project.file(config.crate) : project.getProjectDir();
+        this.workingDir = config.crate != null
+                          ? project.file(config.crate)
+                          : project.getProjectDir();
         File targetDir = new File(this.workingDir, "target");
 
         // For the default toolchain, the output is located in target/<file>
         // For all other toolchains, the output is located in target/<target-triple>/<file>.
         this.outputFiles = config.outputs.entrySet().stream().map(output ->
-                new File(targetDir, (output.getKey().isEmpty() ? "" : output.getKey() + File.separator) + config.profile + File.separator + output.getValue())
+                new File(targetDir, (output.getKey().isEmpty()
+                                     ? ""
+                                     : output.getKey() + File.separator) + config.profile + File.separator + output.getValue())
         ).collect(Collectors.toList());
         if (this.outputFiles.isEmpty()) {
             throw new GradleException("At least one output must be specified.");
@@ -103,15 +117,23 @@ public class CargoTask extends DefaultTask {
     @TaskAction
     public void build() {
         Project project = getProject();
-        project.exec(spec -> {
+        ProviderFactory provider = project.getProviders();
+        provider.exec(spec -> {
             spec.commandLine(this.cargoCommand);
             spec.args(args);
             spec.workingDir(workingDir);
             spec.environment(environment);
-        }).assertNormalExitValue();
+        }).getResult().get().assertNormalExitValue();
+//        project.exec(spec -> {
+//            spec.commandLine(this.cargoCommand);
+//            spec.args(args);
+//            spec.workingDir(workingDir);
+//            spec.environment(environment);
+//        }).assertNormalExitValue();
     }
 
     /**
+     * a getter for the working directory of this task.
      * @return The working directory of this task.
      */
     @InputDirectory
@@ -120,6 +142,7 @@ public class CargoTask extends DefaultTask {
     }
 
     /**
+     * a getter for the output files of this task.
      * @return The output artifacts of this task.
      */
     @OutputFiles

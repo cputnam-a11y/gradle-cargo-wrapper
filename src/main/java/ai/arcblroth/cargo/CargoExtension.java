@@ -24,6 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class CargoExtension {
     /**
+     * Constructs a new Cargo extension.
+     */
+    public CargoExtension() {
+    }
+
+    /**
      * Location of the <code>cargo</code> executable.
      * By default, the plugin will use the Cargo
      * executable located on the path.

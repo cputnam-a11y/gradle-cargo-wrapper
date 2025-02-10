@@ -24,6 +24,12 @@ import org.gradle.api.tasks.TaskProvider;
  */
 @SuppressWarnings("unused")
 public class CargoWrapperPlugin implements Plugin<Project> {
+    /**
+     * Constructs a new Cargo wrapper plugin.
+     */
+    public CargoWrapperPlugin() {
+    }
+
     @Override
     public void apply(Project project) {
         project.getConfigurations().create("default");
